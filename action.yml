@@ -16,7 +16,8 @@ inputs:
   export:
     description: 'Enables or disables exporting the value to the TF_API_TOKEN environment variable.'
     required: false
-    default: false
+    default: true
+    type: boolean
 outputs:
   team_token:
     description: "The requested Terraform team token (is also exported to TF_API_TOKEN env var)."
@@ -36,8 +37,6 @@ runs:
     - id: bundle
       shell: pwsh
       run: |
-        echo 'Preparing Inputs...'
-
         $apiKey = "${{inputs.api-token}}"
         $teamId = "${{inputs.team-id}}"
         $exportEnabled = "${{inputs.export}}"
@@ -45,24 +44,18 @@ runs:
         echo 'Validing Inputs...'
 
         if ([string]::IsNullOrWhiteSpace($apiKey)) {
-            echo 'Missing API Token - You must enter a value for the API token.'
+            echo 'Missing api-token - You must enter a value for the API token.'
             exit 1
         }
 
         if ([string]::IsNullOrWhiteSpace($teamId)) {
-            echo 'Missing Team Name - You must enter the name of the team for which you want a token generated.'
+            echo 'Missing team-id - You must enter the name of the team for which you want a token generated.'
             exit 1
         }
 
-        # Ensure $exportEnabled is treated as a boolean
-
-        $isExportEnabled = $false
-
-        if ($exportEnabled -is [string] -and $exportEnabled.ToLower() -eq "true") {
-            $isExportEnabled = $true
-        }
-        elseif ($exportEnabled -is [bool] -and $exportEnabled) {
-            $isExportEnabled = $true
+        if ($exportEnabled -not [bool]) {
+            echo 'The value for export must be a boolean.'
+            exit 1
         }
 
         try {
@@ -90,20 +83,21 @@ runs:
 
             $response = Invoke-RestMethod -Method Post -Uri $url -Headers $headers -Body $body
 
+            # This masks the sensitive value in action and workflow logs, for both variables and outputs
+            echo "::add-mask::$teamToken"
+
             $teamToken   = $response.data.attributes.token
             $description = $response.data.attributes.description
             $createdat   = $response.data.attributes.'created-at'
             $expiredat   = $response.data.attributes.'expired-at'
 
-
             echo 'Setting outputs...'
-
             echo "team_token=$teamToken" >> $env:GITHUB_OUTPUT
             echo "description=$description" >> $env:GITHUB_OUTPUT
             echo "createdat=$createdat" >> $env:GITHUB_OUTPUT
             echo "expiredat=$expiredat" >> $env:GITHUB_OUTPUT
 
-            if ($isExportEnabled -eq "true") {
+            if ($exportEnabled -eq "true") {
                 echo "Exporting TF_API_TOKEN environment variable..."
                 echo "TF_API_TOKEN=$teamToken" >> $env:GITHUB_ENV
             }
