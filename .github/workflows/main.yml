@@ -1,4 +1,4 @@
-name: Generate and Delete Team Token
+name: Test Create & Delete
 
 on:
   workflow_dispatch:
