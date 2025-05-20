@@ -2,8 +2,8 @@
 
 These workflows are a benefit to anyone who needs to dynamically create short-lived credentials to enact Terraform Plans. See the specific README for instructions and examples.
 
-1. README => [Action: Generate Team Token](https://github.com/LanceMcCarthy/terraform-team-auth/actions/generate-token/readme.md)
-2. README => [Action: Delete Team Token](https://github.com/LanceMcCarthy/terraform-team-auth/actions/generate-token/readme.md)
+1. README => [Action: Generate Team Token](https://github.com/LanceMcCarthy/terraform-team-auth/blob/main/actions/generate-token/README.md)
+2. README => [Action: Delete Team Token](https://github.com/LanceMcCarthy/terraform-team-auth/blob/main/actions/delete-token/README.md)
 
 
 ## Combined Example
