@@ -4,25 +4,23 @@ This action is a great start to any Terraform workflow. Using a User or Org API 
 
 ## Inputs
 
-Below are the action's inputs that need to be defined in the Action's `with` block.
-
 | Required | Input       |  Summary |
 |----------|-------------|---------|
-| [x] | `api-token` | An **organization** or **user** API token, see [Api Docs - Authentication](https://developer.hashicorp.com/terraform/cloud-docs/api-docs#authentication) |
-| [x] | `team-id` | The id of the team (e.g. team-ABdgNT7rDDiBadPi3), can be found in the in URL of the team's page (app.terraform.io/app/[org-id]/settings/teams/[team-id]). |
-| [] | `export` | (default: true) Enables or disables the `TF_API_TOKEN` environment variable. |
+| ✅ | `api-token` | Your Organization Token (can be created at https://app.terraform.io/app/YOUR_ORG_ID/settings/authentication-tokens) |
+| ✅ | `team-id` | The team ID (e.g. `team-ABdgNT7rDDiBadPi3`). This can be found in the in URL of the team's page https://app.terraform.io/app/YOUR_ORG_ID/settings/teams/YOUR-TEAM-ID |
+|  | `export` | (default: true) Enables or disables the `TF_API_TOKEN` environment variable. |
+
+> [!WARNING]
+> Treat your api-token like you would a password. While it does not have permission to perform plans and applies in workspaces. For more information, see the [organization service account documentation](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens#organization-api-tokens).
 
 ## Outputs
 
 | Output | Summary |
 |----------|--------|
 | `team_token` | The value of the token to use for downstream requests. This needs to be used for `TF_API_TOKEN` environment variable in most scenarios. |
-| `description` | The description used when requesting the team token, uses the format "GH Actions - $($env:GITHUB_REPOSITORY)" |
+| `description` | The description used when requesting the team token, uses the format "GH Actions - (Repo Name)" |
 | `createdat` | Timestamp when the token was created. |
 | `expiredat` | Timestamp of when the token expires. |
-
-> [!INFORMATION]
-> Unless disabled, the `team_token` value is automatically exported in the `TF_API_TOKEN` environment variable. 
 
 ```yaml
   - name: Generate a Team Token
