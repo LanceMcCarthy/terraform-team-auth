@@ -53,8 +53,8 @@ runs:
             exit 1
         }
 
-        if ($exportEnabled -not [bool]) {
-            echo 'The value for export must be a boolean.'
+        if ($exportEnabled -notin @($true, $false)) {
+            echo 'The value for export must be a boolean (true or false).'
             exit 1
         }
 
