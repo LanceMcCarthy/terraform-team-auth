@@ -39,7 +39,7 @@ runs:
         echo 'Preparing Inputs...'
 
         $apiKey = "${{inputs.api-token}}"
-        $teamName = "${{inputs.team-name}}"
+        $teamId = "${{inputs.team-id}}"
         $exportEnabled = "${{inputs.export}}"
 
         echo 'Validing Inputs...'
@@ -49,7 +49,7 @@ runs:
             exit 1
         }
 
-        if ([string]::IsNullOrWhiteSpace($teamName)) {
+        if ([string]::IsNullOrWhiteSpace($teamId)) {
             echo 'Missing Team Name - You must enter the name of the team for which you want a token generated.'
             exit 1
         }
@@ -68,7 +68,7 @@ runs:
         try {
             echo 'Preparing request headers and body...'
 
-            $url = "https://app.terraform.io/api/v2/teams/$teamName/authentication-tokens"
+            $url = "https://app.terraform.io/api/v2/teams/$teamId/authentication-tokens"
 
             $headers = @{
                 "Authorization" = "Bearer $apiKey"
