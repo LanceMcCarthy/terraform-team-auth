@@ -1,0 +1,114 @@
+name: 'Terraform Team Auth'
+description: 'Using a user/org token, this action dynamically creates a short-lived Team Token that can be used with subsequent official Terraform workflows.'
+author: 'Lance McCarthy'
+branding:
+  icon: 'user-check'
+  color: 'orange'
+inputs:
+  api-token:
+    description: 'The API token, from your Terraform organaztion settings.'
+    required: true
+    default: ''
+  team-name:
+    description: 'The name of the team.'
+    required: true
+    default: ''
+  export:
+    description: 'Enables or disables setting the TF_API_TOKEN environment variable.'
+    required: false
+    default: false
+outputs:
+  team_token:
+    description: "The requested Terraform team token (is also exported to TF_API_TOKEN env var)."
+    value: ${{steps.bundle.outputs.team_token}}
+  description:
+    description: "The description used when requesting the team token."
+    value: ${{steps.bundle.outputs.description}}
+  createdat:
+    description: "Timestamp when the token was created."
+    value: ${{steps.bundle.outputs.createdat}}
+  expiredat:
+    description: "Timestamp of when the token expires."
+    value: ${{steps.bundle.outputs.expiredat}}
+runs:
+  using: "composite"
+  steps:
+    - id: bundle
+      shell: pwsh
+      run: |
+        echo 'Preparing Inputs...'
+
+        $apiKey = "${{inputs.api-token}}"
+        $teamName = "${{inputs.team-name}}"
+        $exportEnabled = "${{inputs.export}}"
+
+        echo 'Validing Inputs...'
+
+        if ([string]::IsNullOrWhiteSpace($apiKey)) {
+            echo 'Missing API Token - You must enter a value for the API token.'
+            exit 1
+        }
+
+        if ([string]::IsNullOrWhiteSpace($teamName)) {
+            echo 'Missing Team Name - You must enter the name of the team for which you want a token generated.'
+            exit 1
+        }
+
+        # Ensure $exportEnabled is treated as a boolean
+
+        $isExportEnabled = $false
+
+        if ($exportEnabled -is [string] -and $exportEnabled.ToLower() -eq "true") {
+            $isExportEnabled = $true
+        }
+        elseif ($exportEnabled -is [bool] -and $exportEnabled) {
+            $isExportEnabled = $true
+        }
+
+        try {
+            echo 'Preparing request headers and body...'
+
+            $url = "https://app.terraform.io/api/v2/teams/$teamName/authentication-tokens"
+
+            $headers = @{
+                "Authorization" = "Bearer $apiKey"
+                "Content-Type"  = "application/vnd.api+json"
+            }
+
+            $body = @{
+              data = @{
+                type = "authentication-tokens"
+                attributes = @{
+                  description = "GH Actions - $($env:GITHUB_REPOSITORY)"
+                  "expired-at" = (Get-Date).AddHours(24).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                }
+              }
+            } | ConvertTo-Json -Depth 5
+
+
+            echo 'Sending POST Request to Terraform...'
+
+            $response = Invoke-RestMethod -Method Post -Uri $url -Headers $headers -Body $body
+
+            $teamToken   = $response.data.attributes.token
+            $description = $response.data.attributes.description
+            $createdat   = $response.data.attributes.'created-at'
+            $expiredat   = $response.data.attributes.'expired-at'
+
+
+            echo 'Setting outputs...'
+
+            echo "team_token=$teamToken" >> $env:GITHUB_OUTPUT
+            echo "description=$description" >> $env:GITHUB_OUTPUT
+            echo "createdat=$createdat" >> $env:GITHUB_OUTPUT
+            echo "expiredat=$expiredat" >> $env:GITHUB_OUTPUT
+
+            if ($isExportEnabled -eq "true") {
+                echo "Exporting TF_API_TOKEN environment variable..."
+                echo "TF_API_TOKEN=$teamToken" >> $env:GITHUB_ENV
+            }
+        }
+        catch {
+            echo "Error: $($_.Exception.Message)"
+            exit 1
+        }
