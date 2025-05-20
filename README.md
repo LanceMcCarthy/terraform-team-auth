@@ -5,7 +5,6 @@ These workflows are a benefit to anyone who needs to dynamically create short-li
 1. README => [Action: Generate Team Token](https://github.com/LanceMcCarthy/terraform-team-auth/blob/main/actions/generate-token/README.md)
 2. README => [Action: Delete Team Token](https://github.com/LanceMcCarthy/terraform-team-auth/blob/main/actions/delete-token/README.md)
 
-
 ## Combined Example
 
 Be sure to visit the above docs first, but here's a realistic scenario of using both actions.
@@ -36,7 +35,7 @@ jobs:
 
     # Phase 1 - Create a new team token (exports TF_API_TOKEN and TF_API_TOKEN_ID environment variables)
     - name: Generate a Team Token
-      uses: LanceMcCarthy/terraform-team-auth/actions/generate-token@v1
+      uses: LanceMcCarthy/terraform-team-auth/actions/generate-token@v1.0.0
       with:
         api-token: ${{secrets.ORG_OR_USER_API_KEY}}
         team-id: "team-ABdgNT7rDDiBadPi3"
@@ -67,7 +66,7 @@ jobs:
 
     # Phase 3. Delete the Team Token created for this workflow
     - name: Delete a Team Token
-      uses: LanceMcCarthy/terraform-team-auth/actions/delete-token@v1
+      uses: LanceMcCarthy/terraform-team-auth/actions/delete-token@v1.0.0
       with:
         api-token: ${{secrets.ORG_OR_USER_API_KEY}}
         team-token-id: ${{env.TF_API_TOKEN_ID}} 

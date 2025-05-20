@@ -25,7 +25,7 @@ Using an Organization (or User) Token, it dynamically creates a short-lived Team
 ```yaml
   - name: Generate a Team Token
     id: generate-token
-    uses: LanceMcCarthy/terraform-team-auth/generate-token@v1
+    uses: LanceMcCarthy/terraform-team-auth/actions/generate-token@v1.0.0
     with:
       api-token: ${{secrets.ORG_OR_USER_API_KEY}}
       team-id: "team-ABdgNT7rDDiBadPi3"

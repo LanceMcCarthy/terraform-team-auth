@@ -1,6 +1,6 @@
 # Action: Terraform Delete Team Token
 
-This action deletes a Terraform Cloud Team Token.
+This deletes a previously generated Team Token, intended to be used in conjunction with [LanceMcCarthy/terraform-generate-team-token](https://github.com/LanceMcCarthy/terraform-generate-team-token), but can be used in isolation.
 
 ## Inputs
 
@@ -18,7 +18,7 @@ This action deletes a Terraform Cloud Team Token.
 
   # 3. Delete step 1's token 
   - name: Delete a Team Token
-    uses: LanceMcCarthy/terraform-team-auth/delete-token@v1
+    uses: LanceMcCarthy/terraform-team-auth/actions/delete-token@v1.0.0
     with:
       api-token: ${{secrets.ORG_OR_USER_API_KEY}}
       team-token-id: ${{env.TF_API_TOKEN_ID}} 
