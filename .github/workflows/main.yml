@@ -1,4 +1,4 @@
-name: Main
+name: Generate and Delete Team Token
 
 on:
   workflow_dispatch:
@@ -37,4 +37,4 @@ jobs:
         uses: ./actions/delete-token/
         with:
           api-token: ${{secrets.ORG_OR_USER_API_KEY}}
-          token-id: ${{env.TF_API_TOKEN_ID}}
+          team-token-id: ${{env.TF_API_TOKEN_ID}}
