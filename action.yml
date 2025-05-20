@@ -1,20 +1,20 @@
 name: 'Terraform Team Auth'
-description: 'Using a user/org token, this action dynamically creates a short-lived Team Token that can be used with subsequent official Terraform workflows.'
+description: 'Dynamically creates a short-lived Team Token that can be used with Terraform actions.'
 author: 'Lance McCarthy'
 branding:
   icon: 'user-check'
   color: 'orange'
 inputs:
   api-token:
-    description: 'The API token, from your Terraform organaztion settings.'
+    description: "An **organization** or **user** API token, see [Api Docs - Authentication](https://developer.hashicorp.com/terraform/cloud-docs/api-docs#authentication)"
     required: true
     default: ''
-  team-name:
-    description: 'The name of the team.'
+  team-id:
+    description: "The id of the team (e.g. team-ABdgNT7rDDiBadPi3), can be found in the in URL of the team's page (app.terraform.io/app/[org-id]/settings/teams/[team-id])."
     required: true
     default: ''
   export:
-    description: 'Enables or disables setting the TF_API_TOKEN environment variable.'
+    description: 'Enables or disables exporting the value to the TF_API_TOKEN environment variable.'
     required: false
     default: false
 outputs:

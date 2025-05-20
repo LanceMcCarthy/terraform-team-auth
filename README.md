@@ -9,7 +9,7 @@ Below are the action's inputs that need to be defined in the Action's `with` blo
 | Required | Input       |  Summary |
 |----------|-------------|---------|
 | [x] | `api-token` | An **organization** or **user** API token, see [Api Docs - Authentication](https://developer.hashicorp.com/terraform/cloud-docs/api-docs#authentication) |
-| [x] | `team-name` | The name of the team to generate the Team Token for. |
+| [x] | `team-id` | The id of the team (e.g. team-ABdgNT7rDDiBadPi3), can be found in the in URL of the team's page (app.terraform.io/app/[org-id]/settings/teams/[team-id]). |
 | [] | `export` | (default: true) Enables or disables the `TF_API_TOKEN` environment variable. |
 
 ## Outputs
@@ -30,7 +30,7 @@ Below are the action's inputs that need to be defined in the Action's `with` blo
     uses: LanceMcCarthy/terraform-team-auth@v1
     with:
       api-token: ${{secrets.ORG_OR_USER_API_KEY}}
-      team-name: "my-team"
+      team-id: "team-ABdgNT7rDDiBadPi3"
 
   - name: Confirm Result
     run: |
@@ -44,9 +44,9 @@ Below are the action's inputs that need to be defined in the Action's `with` blo
       echo "expiredat: ${{steps.get-team-token.outputs.expiredat}}"
 ```
 
-## Examples
+## Example
 
-Here is an example of the action's real usefulness in a workflow. Usign your Org API token, you can request a Team Token that is used in subsequent actions.
+Here is an example of the action's initial position in a workflow; it gets a new Team Token for you, then use that token for all subsequent Terraform actions. 
 
 ```yaml
 name: 'Terraform Plan'
@@ -74,13 +74,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    # Sets the TF_API_TOKEN environment variable
     - name: Generate a Team Token
       uses: LanceMcCarthy/terraform-team-auth@v1
       with:
         api-token: ${{secrets.ORG_OR_USER_API_KEY}}
-        team-name: "my-team"
+        team-id: "team-ABdgNT7rDDiBadPi3"
 
-    # Continue with https://developer.hashicorp.com/terraform/tutorials/automation/github-actions
+
+    # Continue with Terraform actions
+    # https://developer.hashicorp.com/terraform/tutorials/automation/github-actions
 
     - name: Upload Configuration
       uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
@@ -94,13 +97,13 @@ jobs:
       uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
       id: plan-run
       with:
-        workspace: ${{ env.TF_WORKSPACE }}
-        configuration_version: ${{ steps.plan-upload.outputs.configuration_version_id }}
+        workspace: ${{env.TF_WORKSPACE}}
+        configuration_version: ${{steps.plan-upload.outputs.configuration_version_id}}
         plan_only: true
 
     - name: Get Plan Output
       uses: hashicorp/tfc-workflows-github/actions/plan-output@v1.0.0
       id: plan-output
       with:
-        plan: ${{ fromJSON(steps.plan-run.outputs.payload).data.relationships.plan.data.id }}
+        plan: ${{fromJSON(steps.plan-run.outputs.payload).data.relationships.plan.data.id}}
 ```
