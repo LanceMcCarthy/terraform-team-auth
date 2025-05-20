@@ -1,0 +1,61 @@
+name: 'Terraform Delete Team Token'
+description: 'Deletes a Team Token.'
+author: 'Lance McCarthy'
+branding:
+  icon: 'user-check'
+  color: 'red'
+inputs:
+  api-token:
+    description: "An Organization or User Token (can be created at https://app.terraform.io/app/YOUR_ORG_ID/settings/authentication-tokens)."
+    required: true
+    default: ''
+  team-token-id:
+    description: "The id of the team token that needs to be deleted."
+    required: true
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - id: bundle
+      shell: pwsh
+      run: |
+        $apiKey = "${{inputs.api-token}}"
+        $tokenId = "${{inputs.team-token-id}}"
+
+        echo 'Validing Inputs...'
+
+        if ([string]::IsNullOrWhiteSpace($apiKey)) {
+            echo 'Missing api-token - You must enter a value for the API token.'
+            exit 1
+        }
+
+        if ([string]::IsNullOrWhiteSpace($tokenId)) {
+            echo 'Missing team-token-id - You must enter the name of the team for which you want a token generated.'
+            exit 1
+        }
+
+        try {
+            echo 'Preparing request headers and body...'
+
+            $url = "https://app.terraform.io/api/v2/authentication-tokens/$tokenId"
+
+            $headers = @{
+                "Authorization" = "Bearer $apiKey"
+                "Content-Type"  = "application/vnd.api+json"
+            }
+            
+            echo 'Sending POST Request to Terraform...'
+
+            $response = Invoke-RestMethod -Method Delete -Uri $url -Headers $headers
+
+            if ($null -eq $response -or $LASTEXITCODE -ne 0) {
+                echo "Delete request failed or returned no response."
+                exit 1
+            } else {
+                echo "Token $tokenId was successfully deleted."
+            }
+        }
+        catch {
+            echo "Error: $($_.Exception.Message)"
+            exit 1
+        }

@@ -11,20 +11,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Confirm CREATE
       - name: Generate a Team Token
         id: get-team-token
-        uses: ./
+        uses: ./actions/generate-token/
         with:
           api-token: ${{secrets.ORG_OR_USER_API_KEY}}
           team-id: "team-NEgNT4rDDiBadPi9"
 
-      - name: Confirm Result
+      - name: Check Result
         run: |
           echo "------ENV VAR------"
           echo "TF_API_TOKEN variable: ${{env.TF_API_TOKEN}}"
+          echo "TF_API_TOKEN_ID variable: ${{env.TF_API_TOKEN_ID}}"
 
           echo "------OUTPUTS------"
-          echo "team_token: ${{steps.get-team-token.outputs.team_token}}"
-          echo "description: ${{steps.get-team-token.outputs.description}}"
-          echo "createdat: ${{steps.get-team-token.outputs.createdat}}"
-          echo "expiredat: ${{steps.get-team-token.outputs.expiredat}}"
+          echo "team_token: ${{steps.generate-token.outputs.team_token}}"
+          echo "team_token_id: ${{steps.generate-token.outputs.team_token_id}}"
+          echo "description: ${{steps.generate-token.outputs.description}}"
+          echo "createdat: ${{steps.generate-token.outputs.createdat}}"
+          echo "expiredat: ${{steps.generate-token.outputs.expiredat}}"
+
+      # Confirm DELETE
+      - name: Delete Team Token
+        uses: ./actions/delete-token/
+        with:
+          api-token: ${{secrets.ORG_OR_USER_API_KEY}}
+          token-id: ${{env.TF_API_TOKEN_ID}}

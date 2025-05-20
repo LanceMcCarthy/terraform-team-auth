@@ -1,9 +1,9 @@
-name: 'Terraform Team Auth'
+name: 'Terraform Generate Team Token'
 description: 'Dynamically creates a short-lived Team Token that can be used with Terraform actions.'
 author: 'Lance McCarthy'
 branding:
   icon: 'user-check'
-  color: 'orange'
+  color: 'green'
 inputs:
   api-token:
     description: "An **organization** or **user** API token, see [Api Docs - Authentication](https://developer.hashicorp.com/terraform/cloud-docs/api-docs#authentication)"
@@ -22,6 +22,9 @@ outputs:
   team_token:
     description: "The requested Terraform team token (is also exported to TF_API_TOKEN env var)."
     value: ${{steps.bundle.outputs.team_token}}
+  team_token_id:
+    description: "The ID of the team token (is also exported to TF_API_TOKEN_ID env var)"
+    value: ${{steps.bundle.outputs.team_token_id}}
   description:
     description: "The description used when requesting the team token."
     value: ${{steps.bundle.outputs.description}}
@@ -82,17 +85,18 @@ runs:
             echo 'Sending POST Request to Terraform...'
 
             $response = Invoke-RestMethod -Method Post -Uri $url -Headers $headers -Body $body
-
-            # This masks the sensitive value in action and workflow logs, for both variables and outputs
-            echo "::add-mask::$teamToken"
-
-            $teamToken   = $response.data.attributes.token
+            $tokenId     = $response.data.id
             $description = $response.data.attributes.description
             $createdat   = $response.data.attributes.'created-at'
             $expiredat   = $response.data.attributes.'expired-at'
+            $teamToken   = $response.data.attributes.token
+
+            # We set and mask the token to prevent it from being printed in the logs
+            echo "::add-mask::$teamToken"
 
             echo 'Setting outputs...'
             echo "team_token=$teamToken" >> $env:GITHUB_OUTPUT
+            echo "team_token_id=$tokenId" >> $env:GITHUB_OUTPUT
             echo "description=$description" >> $env:GITHUB_OUTPUT
             echo "createdat=$createdat" >> $env:GITHUB_OUTPUT
             echo "expiredat=$expiredat" >> $env:GITHUB_OUTPUT
@@ -100,6 +104,7 @@ runs:
             if ($exportEnabled -eq "true") {
                 echo "Exporting TF_API_TOKEN environment variable..."
                 echo "TF_API_TOKEN=$teamToken" >> $env:GITHUB_ENV
+                echo "TF_API_TOKEN_ID=$tokenId" >> $env:GITHUB_ENV
             }
         }
         catch {
