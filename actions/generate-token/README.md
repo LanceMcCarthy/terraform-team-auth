@@ -1,6 +1,6 @@
 # Action: Terraform Generate Team Token
 
-This action is a great start to any Terraform workflow. Using an Organization (or User) Token, it dynamically creates a short-lived Team Token that can be used with official Terraform plan workflows.
+Using an Organization (or User) Token, it dynamically creates a short-lived Team Token that can be used with subsequent official Terraform plan workflows.
 
 ## Inputs
 
